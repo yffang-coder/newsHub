@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.gitignore
+.env
+.vscode
+.idea
+*.log
+backend/target
+backend/mvnw
+backend/mvnw.cmd
+backend/.mvn
+deployment
+README.md

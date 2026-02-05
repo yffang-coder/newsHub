@@ -1,0 +1,66 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: newshub-backend
+  datasource:
+    url: jdbc:mysql://localhost:3307/newshub?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      database: 0
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: news-crawler-group-v2
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 1136714194@qq.com
+    password: ylvdijxfzqcohidb
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  
+  task:
+    scheduling:
+      pool:
+        size: 5
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.newshub.backend: DEBUG
+    org.springframework.web: INFO
+
+# Custom Properties
+app:
+  jwt:
+    secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+    expiration: 86400000 # 24 hours
+  crawler:
+    enabled: true
+    interval: 3600000 # 1 hour

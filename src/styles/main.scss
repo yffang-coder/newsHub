@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  
+  --accent: #dc2626;
+  --accent-foreground: #ffffff;
+  
+  --muted: #64748b;
+  --muted-foreground: #64748b;
+  --muted-background: #f8fafc;
+  
+  --border: #e2e8f0;
+}
+
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+  
+  --primary: #f8fafc;
+  --primary-foreground: #020617;
+  
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  
+  --accent: #dc2626;
+  --accent-foreground: #ffffff;
+  
+  --muted: #94a3b8;
+  --muted-foreground: #94a3b8;
+  --muted-background: #0f172a;
+  
+  --border: #1e293b;
+}
+
+body {
+  @apply bg-background text-foreground font-sans;
+}
+
+.container-width {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Element Plus Overrides for Theme Consistency */
+:root {
+  --el-color-primary: var(--primary);
+  --el-text-color-primary: var(--foreground);
+  --el-bg-color: var(--background);
+}

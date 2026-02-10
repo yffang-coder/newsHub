@@ -21,14 +21,17 @@ public interface ArticleMapper {
     @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' AND category_id = #{categoryId} ORDER BY publish_time DESC LIMIT #{limit}")
     List<Article> findByCategory(Long categoryId, int limit);
 
+    @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' AND category_id = #{categoryId} AND id != #{excludeId} ORDER BY publish_time DESC LIMIT #{limit}")
+    List<Article> findRelated(@Param("categoryId") Long categoryId, @Param("excludeId") Long excludeId, @Param("limit") int limit);
+
     @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' AND MATCH(title, summary) AGAINST(#{keyword} IN BOOLEAN MODE) LIMIT 20")
     List<Article> search(String keyword);
 
     @Select("SELECT COUNT(*) FROM articles WHERE source_url = #{url}")
     int countBySourceUrl(String url);
 
-    @Delete("DELETE FROM articles WHERE created_at < DATE_SUB(CURDATE(), INTERVAL 30 DAY)")
-    int deleteOldArticles();
+    @Delete("DELETE FROM articles WHERE created_at < DATE_SUB(CURDATE(), INTERVAL #{days} DAY)")
+    int deleteOldArticles(int days);
 
     @Select("SELECT count(*) FROM articles")
     long count();

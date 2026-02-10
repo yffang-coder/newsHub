@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { User, Share, Star } from '@element-plus/icons-vue';
-import { getArticleDetail, type ArticleDetail } from '@/api/news';
+import { getArticleDetail, getRelatedNews, type ArticleDetail, type NewsItem } from '@/api/news';
 import CommentSection from '@/components/CommentSection.vue';
 
 const route = useRoute();
+const router = useRouter();
 const article = ref<ArticleDetail | null>(null);
+const relatedNews = ref<NewsItem[]>([]);
 const loading = ref(true);
 
 onMounted(async () => {
@@ -14,6 +16,7 @@ onMounted(async () => {
   if (id) {
     try {
       article.value = await getArticleDetail(id);
+      relatedNews.value = await getRelatedNews(id);
     } catch (error) {
       console.error('Failed to fetch article:', error);
     } finally {
@@ -21,6 +24,20 @@ onMounted(async () => {
     }
   }
 });
+
+const navigateToArticle = (id: number) => {
+  router.push(`/article/${id}`).then(() => {
+    // Force reload or update when navigating to same component
+    window.location.reload(); 
+    // Ideally, we should watch route param changes, but reload is safer for now to ensure all states reset
+  });
+};
+
+const navigateToCategory = (id?: number) => {
+  if (id) {
+    router.push(`/category/${id}`);
+  }
+};
 </script>
 
 <template>
@@ -32,7 +49,12 @@ onMounted(async () => {
     <!-- Article Header -->
     <header class="max-w-4xl mx-auto mb-12 text-center">
       <div class="flex items-center justify-center gap-2 text-sm font-medium mb-6">
-        <span class="text-accent uppercase tracking-wider">{{ article.category }}</span>
+        <span 
+          class="text-accent uppercase tracking-wider cursor-pointer hover:underline"
+          @click="navigateToCategory(article.categoryId)"
+        >
+          {{ article.category }}
+        </span>
         <span class="text-muted-foreground">•</span>
         <span class="text-muted-foreground">{{ article.date }} {{ article.time }}</span>
       </div>
@@ -110,13 +132,28 @@ onMounted(async () => {
         <div class="mt-12 pt-8 border-t border-border">
           <div class="flex flex-wrap gap-2">
             <el-tag 
-              v-for="tag in ['气候变化', '巴黎协定', '碳中和', '联合国']" 
-              :key="tag" 
               effect="dark"
               type="info"
               class="!bg-secondary !text-secondary-foreground !border-none cursor-pointer hover:opacity-80"
+              @click="navigateToCategory(article.categoryId)"
             >
-              #{{ tag }}
+              #{{ article.category }}
+            </el-tag>
+             <el-tag 
+              effect="dark"
+              type="info"
+              class="!bg-secondary !text-secondary-foreground !border-none cursor-pointer hover:opacity-80"
+              @click="router.push('/latest')"
+            >
+              #最新新闻
+            </el-tag>
+             <el-tag 
+              effect="dark"
+              type="info"
+              class="!bg-secondary !text-secondary-foreground !border-none cursor-pointer hover:opacity-80"
+              @click="router.push('/')"
+            >
+              #NewsHub
             </el-tag>
           </div>
         </div>
@@ -129,10 +166,18 @@ onMounted(async () => {
       <aside class="lg:col-span-2 space-y-6">
         <h3 class="font-bold text-primary border-b border-border pb-2">相关阅读</h3>
         <div class="space-y-4">
-          <div v-for="i in 3" :key="i" class="block group cursor-pointer">
-            <span class="text-xs text-accent block mb-1">国际</span>
+          <div v-if="relatedNews.length === 0" class="text-sm text-muted-foreground">
+            暂无相关推荐
+          </div>
+          <div 
+            v-for="news in relatedNews" 
+            :key="news.id" 
+            class="block group cursor-pointer"
+            @click="navigateToArticle(news.id)"
+          >
+            <span class="text-xs text-accent block mb-1">{{ news.category }}</span>
             <h4 class="text-sm font-medium leading-snug group-hover:text-primary/70 transition-colors">
-              欧盟提出新的环保法案，限制一次性塑料制品的使用
+              {{ news.title }}
             </h4>
           </div>
         </div>
@@ -147,4 +192,10 @@ onMounted(async () => {
 
 <style>
 /* Custom prose styles if needed beyond Tailwind Typography */
+.prose p {
+  text-indent: 2em;
+  margin-bottom: 1.5em;
+  line-height: 1.8;
+  text-align: justify;
+}
 </style>

@@ -42,6 +42,13 @@ public class NewsController {
         return ResponseEntity.ok(newsService.getNewsByCategory(categoryId, limit));
     }
 
+    @Operation(summary = "Get related news", description = "Returns related articles for a given article ID")
+    @GetMapping("/{id}/related")
+    public ResponseEntity<List<Article>> getRelatedNews(@PathVariable Long id, 
+                                                      @RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(newsService.getRelatedArticles(id, limit));
+    }
+
     @Operation(summary = "Search news", description = "Search articles by title or summary")
     @GetMapping("/search")
     public ResponseEntity<List<Article>> searchNews(@RequestParam String q) {

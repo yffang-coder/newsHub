@@ -1,10 +1,22 @@
 import request from './request';
 
+const categoryNames: Record<number, string> = {
+  1: '时事',
+  2: '国际',
+  3: '科技',
+  4: '体育',
+  5: '财经',
+  6: '文化'
+};
+
+export const getCategoryName = (id: number) => categoryNames[id] || '新闻';
+
 export interface NewsItem {
   id: number;
   title: string;
   excerpt?: string;
   category: string;
+  categoryId?: number;
   date: string;
   author?: string;
   image?: string;
@@ -41,7 +53,8 @@ export const getFeaturedNews = async () => {
             id: item.id,
             title: item.title,
             excerpt: item.summary,
-            category: '头条', // Temporary fallback
+            category: getCategoryName(item.categoryId),
+            categoryId: item.categoryId,
             date: formatDate(item.publishTime),
             author: item.sourceName || 'NewsHub',
             image: item.coverImage
@@ -62,7 +75,8 @@ export const getTrendingNews = async () => {
           id: item.id,
           title: item.title,
           excerpt: item.summary,
-          category: '热门',
+          category: getCategoryName(item.categoryId),
+          categoryId: item.categoryId,
           date: formatDate(item.publishTime),
           author: item.sourceName || 'NewsHub',
           image: item.coverImage
@@ -83,7 +97,8 @@ export const getLatestNews = async () => {
           id: item.id,
           title: item.title,
           excerpt: item.summary,
-          category: '最新',
+          category: getCategoryName(item.categoryId),
+          categoryId: item.categoryId,
           date: formatDate(item.publishTime),
           author: item.sourceName || 'NewsHub',
           image: item.coverImage
@@ -103,7 +118,8 @@ export const getArticleDetail = async (id: number | string) => {
         id: res.id,
         title: res.title,
         excerpt: res.summary,
-        category: '详情',
+        category: getCategoryName(res.categoryId),
+        categoryId: res.categoryId,
         date: new Date(res.publishTime).toLocaleDateString(),
         time: new Date(res.publishTime).toLocaleTimeString(),
         author: res.sourceName || 'NewsHub',
@@ -125,7 +141,8 @@ export const searchNews = async (keyword: string) => {
           id: item.id,
           title: item.title,
           excerpt: item.summary,
-          category: 'Search Result',
+          category: getCategoryName(item.categoryId),
+          categoryId: item.categoryId,
           date: formatDate(item.publishTime),
           author: item.sourceName || 'NewsHub',
           image: item.coverImage
@@ -147,6 +164,7 @@ export const getNbaNews = async () => {
           title: item.title,
           excerpt: item.summary,
           category: 'NBA',
+          categoryId: 4,
           date: formatDate(item.publishTime),
           author: item.sourceName || 'NewsHub',
           image: item.coverImage
@@ -171,7 +189,8 @@ export const getNewsByCategory = async (categoryId: number, _page: number = 1, p
           id: item.id,
           title: item.title,
           excerpt: item.summary,
-          category: 'Category', // We can improve this if we fetch category name
+          category: getCategoryName(categoryId),
+          categoryId: categoryId,
           date: formatDate(item.publishTime),
           author: item.sourceName || 'NewsHub',
           image: item.coverImage
@@ -180,6 +199,28 @@ export const getNewsByCategory = async (categoryId: number, _page: number = 1, p
     return [];
   } catch (error) {
     console.error(`Error fetching news for category ${categoryId}:`, error);
+    return [];
+  }
+};
+
+export const getRelatedNews = async (id: number | string) => {
+  try {
+    const res = await request.get(`/news/${id}/related?limit=5`) as any;
+    if (Array.isArray(res)) {
+      return res.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          excerpt: item.summary,
+          category: getCategoryName(item.categoryId),
+          categoryId: item.categoryId,
+          date: formatDate(item.publishTime),
+          author: item.sourceName || 'NewsHub',
+          image: item.coverImage
+      })) as NewsItem[];
+    }
+    return [];
+  } catch (error) {
+    console.error(`Error fetching related news for article ${id}:`, error);
     return [];
   }
 };

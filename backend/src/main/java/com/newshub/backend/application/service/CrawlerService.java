@@ -29,12 +29,8 @@ public class CrawlerService {
     @Autowired
     private ArticleMapper articleMapper;
 
-    @Scheduled(cron = "0 0 0 * * ?") // Run at 00:00 every day
-    public void cleanupOldNews() {
-        log.info("Starting cleanup of old news...");
-        int deletedCount = articleMapper.deleteOldArticles();
-        log.info("Cleanup completed. Deleted " + deletedCount + " old articles.");
-    }
+    // Data cleanup is now handled by DataCleanupService
+
 
     @Value("${app.crawler.script-path:/app/crawler-python}")
     private String scriptPath;

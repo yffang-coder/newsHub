@@ -203,43 +203,5 @@ const navigateToArticle = (id: number) => {
         </article>
       </div>
     </section>
-
-    <!-- About Module (Footer) -->
-    <section class="mt-16 pt-8 border-t border-border">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- About Us -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-bold text-primary">关于 NewsHub</h3>
-          <p class="text-muted-foreground text-sm leading-relaxed">
-            NewsHub 是一个致力于为您提供最新、最快、最深度新闻报道的聚合平台。我们要做的不仅是传递信息，更是连接世界，启发思考。
-          </p>
-        </div>
-
-        <!-- Contact -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-bold text-primary">联系我们</h3>
-          <ul class="space-y-2 text-sm text-muted-foreground">
-            <li>Email: contact@newshub.com</li>
-            <li>Phone: +86 123 4567 8900</li>
-            <li>Address: 北京市朝阳区科技园区 NewsHub 大厦</li>
-          </ul>
-        </div>
-
-        <!-- Links -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-bold text-primary">快速链接</h3>
-          <div class="flex flex-col space-y-2 text-sm">
-            <RouterLink to="/" class="text-muted-foreground hover:text-accent">首页</RouterLink>
-            <RouterLink to="/latest" class="text-muted-foreground hover:text-accent">最新新闻</RouterLink>
-            <RouterLink to="/trending" class="text-muted-foreground hover:text-accent">热门排行</RouterLink>
-            <a href="#" class="text-muted-foreground hover:text-accent">隐私政策</a>
-            <a href="#" class="text-muted-foreground hover:text-accent">服务条款</a>
-          </div>
-        </div>
-      </div>
-      <div class="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-        &copy; {{ new Date().getFullYear() }} NewsHub. All rights reserved.
-      </div>
-    </section>
   </main>
 </template>

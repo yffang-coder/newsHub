@@ -2,6 +2,7 @@ import os
 import time
 import json
 import sys
+import re
 import feedparser
 import requests
 from bs4 import BeautifulSoup
@@ -84,6 +85,34 @@ def extract_article(url, category_id=3):
         
     log("DEBUG: Trafilatura done")
     xml_soup = BeautifulSoup(xml_content, "xml")
+    
+    # Extract content as HTML paragraphs
+    paragraphs = []
+    # Try to find all 'p' tags inside 'main' or document
+    p_tags = xml_soup.find_all('p')
+    if p_tags:
+        for p in p_tags:
+            # Clean text inside paragraph
+            p_text = p.get_text().strip()
+            if p_text:
+                paragraphs.append(f"<p>{p_text}</p>")
+    else:
+        # Fallback if no <p> tags
+        text_raw = xml_soup.get_text(separator="\n").strip()
+        for line in text_raw.split("\n"):
+            line = line.strip()
+            if line:
+                paragraphs.append(f"<p>{line}</p>")
+    
+    # Join paragraphs
+    content_html = "\n".join(paragraphs)
+    
+    # Clean up repetitive footer info using Regex
+    # Remove editor/source info often at end
+    content_html = re.sub(r'<p>\s*(\(|（)?\s*(责编|责任编辑|来源)[:：].*?(\)|）)?\s*</p>', '', content_html, flags=re.IGNORECASE)
+    # Remove standalone date lines often found at bottom
+    content_html = re.sub(r'<p>\s*\d{4}[年-]\d{1,2}[月-]\d{1,2}[日]?\s*(\d{1,2}:\d{1,2})?.*?</p>\s*$', '', content_html, flags=re.DOTALL)
+    
     text = xml_soup.get_text(separator="\n").strip()
     
     # Extract metadata
@@ -129,7 +158,7 @@ def extract_article(url, category_id=3):
     return {
         "title": title or url,
         "summary": summary,
-        "content": text,
+        "content": content_html,
         "coverImage": cover,
         "authorId": 1,
         "categoryId": category_id,

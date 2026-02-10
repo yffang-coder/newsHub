@@ -102,7 +102,12 @@ INSERT IGNORE INTO categories (name, slug) VALUES
 ('World', 'world'),
 ('Culture', 'culture');
 
-INSERT IGNORE INTO settings (`key`, `value`) VALUES 
+REPLACE INTO settings (`key`, `value`) VALUES 
 ('site_name', 'NewsHub'),
 ('site_description', 'A modern news aggregation platform'),
-('footer_text', '© 2024 NewsHub. All rights reserved.');
+('footer_text', '© 2024 NewsHub. All rights reserved.'),
+('retention_days', '3'),
+('about_content', '# 关于我们\n\nNewsHub 是一个致力于提供最新、最热新闻聚合的平台。\n\n## 我们的使命\n\n连接世界，传递价值。\n\n## 我们的愿景\n\n成为全球领先的新闻聚合服务提供商。'),
+('contact_content', '# 联系方式\n\n如果您有任何问题或建议，请通过以下方式联系我们：\n\n- 邮箱: support@newshub.com\n- 电话: +86 123 4567 8901\n- 地址: 北京市朝阳区科技园'),
+('careers_content', '# 加入我们\n\n我们正在寻找优秀的你！\n\n## 开放职位\n\n### Java 后端工程师\n- 负责后端服务的设计与开发\n- 熟悉 Spring Boot, MySQL, Redis\n\n### 前端工程师\n- 负责前端界面的开发\n- 熟悉 Vue 3, TypeScript'),
+('privacy_content', '# 隐私政策\n\n我们重视您的隐私。\n\n1. **信息收集**: 我们仅收集必要的信息以提供服务。\n2. **信息使用**: 您的信息将仅用于改善用户体验。\n3. **信息保护**: 我们采取严格的安全措施保护您的数据。');

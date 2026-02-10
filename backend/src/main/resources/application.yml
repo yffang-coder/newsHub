@@ -63,4 +63,5 @@ app:
     expiration: 86400000 # 24 hours
   crawler:
     enabled: true
-    interval: 3600000 # 1 hour
+    interval: 14400000 # 4 hours
+    python-command: python

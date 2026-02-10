@@ -66,6 +66,14 @@ public class NewsService {
         return articleMapper.findByCategory(categoryId, limit);
     }
 
+    public List<Article> getRelatedArticles(Long articleId, int limit) {
+        Article article = articleMapper.findById(articleId);
+        if (article == null) {
+            return List.of();
+        }
+        return articleMapper.findRelated(article.getCategoryId(), articleId, limit);
+    }
+
     public List<Article> searchArticles(String keyword) {
         return articleMapper.search(keyword);
     }

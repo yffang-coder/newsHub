@@ -8,6 +8,7 @@ D:\blog\backend\src\main\java\com\newshub\backend\application\service\NewsServic
 D:\blog\backend\src\main\java\com\newshub\backend\application\service\LocalProducerService.java
 D:\blog\backend\src\main\java\com\newshub\backend\application\service\RedisCacheService.java
 D:\blog\backend\src\main\java\com\newshub\backend\interfaces\dto\LoginByCodeRequest.java
+D:\blog\backend\src\main\java\com\newshub\backend\interfaces\rest\PublicSettingsController.java
 D:\blog\backend\src\main\java\com\newshub\backend\domain\model\Settings.java
 D:\blog\backend\src\main\java\com\newshub\backend\application\service\KafkaProducerService.java
 D:\blog\backend\src\main\java\com\newshub\backend\domain\model\Comment.java

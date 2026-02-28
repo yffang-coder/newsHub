@@ -18,7 +18,7 @@ fi
 # Build and start containers
 echo "📦 Building and starting containers..."
 docker-compose down
-docker-compose up -d --build
+docker-compose up -d
 
 echo "✨ Deployment completed successfully!"
 echo "🌐 Frontend: http://localhost (or your server IP)"

@@ -68,13 +68,18 @@ public class CrawlerService {
     }
 
     @Scheduled(fixedRateString = "${app.crawler.interval}")
-    public void crawlWeather() {
-        log.info("Triggering Weather crawler...");
+    public void crawlWeatherScheduled() {
+        // Default city for scheduled weather crawl
+        crawlWeather("上海");
+    }
+
+    public void crawlWeather(String city) {
+        log.info("Triggering Weather crawler for city: {}...", city);
         new Thread(() -> {
             try {
                 // Run Weather Python script
                 String script = Paths.get(scriptPath, "weather_crawler.py").toString();
-                ProcessBuilder pb = new ProcessBuilder(pythonCommand, script);
+                ProcessBuilder pb = new ProcessBuilder(pythonCommand, script, city); // Pass city as argument
                 pb.redirectErrorStream(true);
                 
                 Process process = pb.start();
@@ -88,10 +93,10 @@ public class CrawlerService {
                 }
                 
                 int exitCode = process.waitFor();
-                log.info("Weather crawler exited with code: " + exitCode);
+                log.info("Weather crawler for {} exited with code: {}", city, exitCode);
                 
             } catch (Exception e) {
-                log.error("Error running Weather crawler", e);
+                log.error("Error running Weather crawler for {}: {}", city, e.getMessage());
             }
         }).start();
     }
@@ -100,7 +105,7 @@ public class CrawlerService {
     public void init() {
         // Run crawlers on startup
         log.info("Application Ready: Triggering initial weather crawl...");
-        crawlWeather();
+        crawlWeather("上海"); // Initial crawl for default city
     }
 }
 

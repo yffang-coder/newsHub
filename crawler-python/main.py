@@ -12,12 +12,12 @@ from kafka import KafkaProducer
 from datetime import datetime
 
 RSS_FEEDS = [
-    {"url": "http://www.people.com.cn/rss/politics.xml", "category_id": 1},
-    {"url": "http://www.chinanews.com.cn/rss/scroll-news.xml", "category_id": 1},
-    {"url": "http://www.people.com.cn/rss/world.xml", "category_id": 2},
-    {"url": "http://www.chinanews.com.cn/rss/world.xml", "category_id": 2},
-    {"url": "http://www.chinanews.com.cn/rss/sports.xml", "category_id": 4},
-    {"url": "http://www.people.com.cn/rss/sports.xml", "category_id": 4},
+    {"url": "http://www.people.com.cn/rss/politics.xml", "category_id": 1, "source": "人民网-时政"},
+    {"url": "http://www.chinanews.com.cn/rss/scroll-news.xml", "category_id": 1, "source": "中国新闻网-滚动"},
+    {"url": "http://www.people.com.cn/rss/world.xml", "category_id": 2, "source": "人民网-国际"},
+    {"url": "http://www.chinanews.com.cn/rss/world.xml", "category_id": 2, "source": "中国新闻网-国际"},
+    {"url": "http://www.chinanews.com.cn/rss/sports.xml", "category_id": 4, "source": "中国新闻网-体育"},
+    {"url": "http://www.people.com.cn/rss/sports.xml", "category_id": 4, "source": "人民网-体育"},
 ]
 
 INTERVAL_SECONDS = int(os.getenv("CRAWLER_INTERVAL_SECONDS", "600"))
@@ -41,7 +41,7 @@ def get_producer():
 def iso_now():
     return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
 
-def extract_article(url, category_id=3):
+def extract_article(url, category_id=3, source_name="NewsHub"):
     log(f"DEBUG: extract_article called for {url}")
     try:
         log("DEBUG: Requesting URL...")
@@ -163,7 +163,7 @@ def extract_article(url, category_id=3):
         "authorId": 1,
         "categoryId": category_id,
         "sourceUrl": url,
-        "sourceName": "NewsHub Python Crawler",
+        "sourceName": source_name,
         "publishTime": publish_time,
         "status": "PUBLISHED",
     }
@@ -171,12 +171,13 @@ def extract_article(url, category_id=3):
 def process_feed(feed_info):
     url = feed_info["url"]
     category_id = feed_info["category_id"]
+    source_name = feed_info.get("source", "NewsHub")
     feed = feedparser.parse(url)
     for entry in feed.entries:
         link = entry.get("link")
         if not link:
             continue
-        article = extract_article(link, category_id)
+        article = extract_article(link, category_id, source_name)
         if article:
             get_producer().send(KAFKA_TOPIC, article)
             get_producer().flush()

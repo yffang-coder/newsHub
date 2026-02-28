@@ -1,135 +1,133 @@
-# NewsHub - 现代化新闻聚合平台
+# NewsHub - 现代化全栈新闻聚合平台
 
-NewsHub 是一个全栈新闻聚合平台，旨在通过统一的现代化界面抓取、处理和展示来自各种来源的新闻。它拥有强大的后台内容管理系统、响应式的前端阅读界面以及自动化的爬虫系统。
+NewsHub 是一个基于现代化技术栈构建的全栈新闻聚合平台。它通过自动化的 Python 爬虫系统抓取多源新闻，利用 Spring Boot 后端进行高效处理与存储，并通过 Vue 3 构建的高性能前端界面为用户提供极致的阅读体验。
 
-## 🚀 功能特性
+---
 
-- **新闻聚合**：自动化爬虫系统，从 RSS 源和 Web 来源抓取新闻。
-- **内容管理**：功能完善的后台管理仪表盘，用于管理文章、用户、评论和站点设置。
-- **用户系统**：安全的身份认证 (JWT)、个人资料管理以及基于角色的访问控制 (管理员/普通用户)。
-- **交互功能**：评论系统、全文搜索、天气组件以及每日星座运势。
-- **动态设置**：管理员可配置站点设置、"关于我们"页面内容以及数据保留策略。
-- **响应式设计**：基于 Vue 3 和 Tailwind CSS 构建，提供移动端和桌面端的无缝体验。
-- **高性能**：使用 Redis 缓存热点数据，并优化了数据库查询。
+## 🌟 核心功能
 
-## 🛠 技术栈
+### 🌐 前台阅读 (Public)
+- **多维度新闻展示**：包含头条推荐、最新资讯等板块。
+- **分类浏览**：支持时事、科技、体育、财经、文化等多个频道。
+- **全文检索**：基于数据库的高效关键词搜索功能。
+- **实时组件**：集成动态天气预报与每日星座运势。
+- **极致体验**：支持 Markdown 渲染、图片懒加载及响应式布局（完美适配手机/平板/电脑）。
+
+### 👤 用户系统 (User)
+- **安全认证**：基于 JWT 的无状态身份验证。
+- **互动交流**：支持文章评论发表与回复。
+- **收藏管理**：用户可收藏感兴趣的文章，建立个人阅读库。
+
+### ⚙️ 后台管理 (Admin)
+- **数据可视化**：基于 ECharts 的仪表盘，实时监控访问量、文章增长及评论趋势。
+- **内容控管**：完整的文章发布、编辑、下架及分类管理功能。
+- **用户审计**：管理注册用户权限与状态。
+- **系统设置**：动态配置站点基本信息、"关于我们"、数据保留策略等。
+- **消息推送**：管理员可向特定用户或全站用户发送通知。
+
+---
+
+## 🛠 技术架构
 
 ### 前端 (Frontend)
-- **框架**: Vue 3 (Composition API) + TypeScript
-- **构建工具**: Vite
-- **UI 组件库**: Element Plus
-- **样式**: Tailwind CSS + SCSS
-- **状态管理**: Pinia
-- **路由**: Vue Router
-- **Markdown 渲染**: Marked
+- **核心框架**: [Vue 3](https://vuejs.org/) (Composition API)
+- **状态管理**: [Pinia](https://pinia.vuejs.org/)
+- **路由**: [Vue Router](https://router.vuejs.org/)
+- **UI 组件库**: [Element Plus](https://element-plus.org/)
+- **样式方案**: [Tailwind CSS](https://tailwindcss.com/) + SCSS
+- **可视化**: [ECharts](https://echarts.apache.org/)
 
 ### 后端 (Backend)
-- **框架**: Spring Boot 3.2.3
-- **ORM**: MyBatis
-- **安全**: Spring Security + JWT
-- **数据库**: MySQL 8.0
-- **缓存**: Redis
-- **消息队列**: Apache Kafka (可选/基于 Profile 配置)
-- **构建工具**: Maven
+- **核心框架**: [Spring Boot 3.2.3](https://spring.io/projects/spring-boot)
+- **持久层**: [MyBatis](https://mybatis.org/mybatis-3/) (注解方式 + 动态 SQL)
+- **安全框架**: [Spring Security](https://spring.io/projects/spring-security)
+- **令牌机制**: [JSON Web Token (JWT)](https://jwt.io/)
+- **缓存**: [Redis](https://redis.io/) (支持热点数据 5 分钟 TTL)
+- **数据库**: [MySQL 8.0](https://www.mysql.com/)
 
-### 爬虫与数据 (Crawler & Data)
-- **语言**: Python 3
-- **库**: BeautifulSoup4, Feedparser, Trafilatura, Requests
-- **集成**: Kafka Producer / 直接数据库写入
+### 爬虫系统 (Crawler)
+- **核心语言**: Python 3.10+
+- **解析技术**: BeautifulSoup4, Feedparser (RSS), Trafilatura
+- **集成方式**: 定时任务执行，直接写入数据库或通过 Kafka 异步处理。
+
+---
 
 ## 📂 项目结构
 
-```
+```text
 blog/
-├── backend/                # Spring Boot 后端应用
-│   ├── src/main/java       # Java 源代码
-│   └── src/main/resources  # 配置文件 (application.yml) & SQL 脚本
-├── src/                    # Vue 3 前端源代码
-│   ├── api/                # API 客户端层
-│   ├── components/         # 可复用的 Vue 组件
-│   ├── views/              # 页面视图 (后台, 公共前台)
-│   └── stores/             # Pinia 状态仓库
-├── crawler-python/         # Python 新闻/天气爬虫脚本
-├── deployment/             # 部署配置 (Docker, Nginx)
-└── package.json            # 前端依赖配置
+├── backend/                # Spring Boot 后端源码
+│   ├── src/main/java       # 核心业务逻辑
+│   ├── src/main/resources  # 配置(yml)及SQL脚本(schema.sql)
+│   └── pom.xml             # Maven 依赖配置
+├── src/                    # Vue 3 前端源码
+│   ├── api/                # Axios 封装与接口定义
+│   ├── components/         # 公共组件库
+│   ├── views/              # 业务页面 (Admin/Public)
+│   ├── stores/             # Pinia 状态管理
+│   └── router/             # 路由配置
+├── crawler-python/         # Python 爬虫系统
+│   ├── main.py             # 爬虫入口
+│   └── requirements.txt    # Python 依赖
+├── deployment/             # 部署配置文件
+│   ├── docker-compose.yml  # 一键部署配置
+│   └── nginx.conf          # Nginx 反向代理配置
+└── package.json            # 前端依赖与脚本
 ```
 
-## 📋 环境要求
+---
 
-- **Java**: JDK 17 或更高版本
-- **Node.js**: v18 或更高版本
-- **Python**: v3.10 或更高版本
-- **Database**: MySQL 8.0+
-- **Cache**: Redis 6+
+## ⚡ 快速开始 (本地开发)
 
-## ⚡ 快速开始
+### 1. 环境准备
+确保已安装：JDK 17+, Node.js 18+, Python 3.10+, MySQL 8.0+, Redis 6+。
 
-### 1. 数据库设置
+### 2. 数据库初始化
+1. 创建数据库 `newshub`。
+2. 运行 blog/backend/src/main/resources/schema.sql 初始化表结构与默认数据。
 
-1. 创建一个名为 `newshub` 的 MySQL 数据库。
-2. 使用 `backend/src/main/resources/schema.sql` 初始化数据库结构。
-   ```sql
-   -- 在您的 MySQL 客户端中运行
-   source backend/src/main/resources/schema.sql;
-   ```
-3. 确保 Redis 运行在默认端口 `6379`。
-
-### 2. 后端设置
-
-进入 `backend` 目录：
-
+### 3. 后端启动
 ```bash
 cd backend
-```
-
-如果您的数据库账号密码不是默认值，请修改 `src/main/resources/application-local.yml` 配置。
-
-运行应用程序：
-
-```bash
+# 使用本地开发配置启动
 mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
-后端 API 将启动在 `http://localhost:8080`。
+后端 API 地址：`http://localhost:8080`
 
-### 3. 前端设置
-
-进入项目根目录 (即 `package.json` 所在目录)：
-
+### 4. 前端启动
 ```bash
-# 安装依赖
 npm install
-
-# 启动开发服务器
 npm run dev
 ```
-前端应用将启动在 `http://localhost:5173`。
+前端访问地址：`http://localhost:5173`
 
-### 4. 爬虫设置 (可选)
+---
 
-如果您想运行新闻/天气爬虫：
+## 🚢 生产部署
+
+### Docker 一键部署 (推荐)
+项目提供了一套完整的 Docker 容器化方案，包含 MySQL、Redis、Kafka、前端 Nginx 以及后端服务。
 
 ```bash
-cd crawler-python
-
-# 创建虚拟环境
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 运行爬虫
-python main.py
+cd deployment
+# 启动所有服务
+docker-compose up -d
 ```
 
-## 🔧 配置说明
+### 宝塔面板部署
+详细的宝塔部署步骤请参考 blog/deployment/BAOTA_GUIDE.md。
 
-- **后端**: 
-  - `backend/src/main/resources/application.yml`: 主配置文件。
-  - `backend/src/main/resources/application-local.yml`: 本地开发环境覆盖配置。
-- **前端**:
-  - `src/api/request.ts`: 基础 API URL 配置。
+---
 
-## 📄 开源协议
+## 🔧 关键配置说明
 
-本项目采用 MIT 许可证。
+- **JWT 密钥**: 在 `application.yml` 的 `app.jwt.secret` 中修改。
+- **爬虫间隔**: 修改 `app.crawler.interval` 配置（默认为 4 小时）。
+- **缓存策略**: 热点新闻默认缓存 5 分钟，单篇文章缓存 1 小时。
+- **跨域配置**: 后端 Controller 已通过 `@CrossOrigin` 开启跨域支持。
+
+---
+
+## 📄 许可证
+
+本项目采用 [MIT License](LICENSE) 许可协议。

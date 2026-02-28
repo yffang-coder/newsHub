@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getAllUsers, deleteUser, updateUserRole } from '@/api/admin';
-import { Delete } from '@element-plus/icons-vue';
+import { Delete, Refresh } from '@element-plus/icons-vue';
 
 const users = ref([]);
 const loading = ref(false);
@@ -10,7 +10,7 @@ const loading = ref(false);
 const fetchUsers = async () => {
   loading.value = true;
   try {
-    const data = await getAllUsers();
+    const { data } = await getAllUsers();
     users.value = data;
   } catch (error) {
     ElMessage.error('获取用户列表失败');
@@ -39,7 +39,7 @@ const handleDelete = (user: any) => {
   }).catch(() => {});
 };
 
-const handleRoleChange = async (user: any, newRole: string) => {
+const handleRoleChange = async (user: any, newRole: 'USER' | 'ADMIN') => {
   try {
     await updateUserRole(user.id, newRole);
     ElMessage.success('权限已更新');
@@ -60,7 +60,7 @@ onMounted(() => {
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-primary">用户管理</h2>
-      <el-button type="primary" @click="fetchUsers">刷新列表</el-button>
+      <el-button :icon="Refresh" circle @click="fetchUsers" :loading="loading" />
     </div>
 
     <el-card shadow="hover" class="!border-none">

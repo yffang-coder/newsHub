@@ -15,7 +15,7 @@ PROVINCES = [
     "内蒙古", "广西", "西藏", "宁夏", "新疆"
 ]
 
-BACKEND_API_URL = os.getenv("BACKEND_API_URL", "http://127.0.0.1:8080/api/public/weather/update")
+BACKEND_API_BASE_URL = os.getenv("BACKEND_API_URL", "http://127.0.0.1:8080/api/public/weather/update")
 
 def log(msg):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] [WeatherCrawler] {msg}")
@@ -50,26 +50,33 @@ def fetch_weather(city):
         log(f"Error fetching weather for {city}: {e}")
     return None
 
-def run():
+def run(target_city=None):
     log("Starting weather crawl...")
     results = []
-    for province in PROVINCES:
-        data = fetch_weather(province)
+    cities_to_crawl = [target_city] if target_city else PROVINCES
+
+    for city in cities_to_crawl:
+        data = fetch_weather(city)
         if data:
             results.append(data)
-            log(f"Fetched {province}: {data['type']} {data['low']}~{data['high']}")
+            log(f"Fetched {city}: {data['type']} {data['low']}~{data['high']}")
         else:
-            log(f"Failed to fetch {province}")
+            log(f"Failed to fetch {city}")
         time.sleep(1) # Be polite
 
     # Push to backend
     if results:
         try:
-            resp = requests.post(BACKEND_API_URL, json=results, timeout=10)
+            # Append city parameter to the URL
+            backend_api_url = f"{BACKEND_API_BASE_URL}?city={target_city if target_city else '上海'}"
+            resp = requests.post(backend_api_url, json=results, timeout=10)
             log(f"Posted to backend: {resp.status_code}")
         except Exception as e:
             log(f"Error posting to backend: {e}")
 
 if __name__ == "__main__":
-    run()
+    if len(sys.argv) > 1:
+        run(sys.argv[1])
+    else:
+        run()
 

@@ -23,5 +23,10 @@ public class RedisCacheService implements CacheService {
     public Object get(String key) {
         return redisTemplate.opsForValue().get(key);
     }
+
+    @Override
+    public void delete(String key) {
+        redisTemplate.delete(key);
+    }
 }
 

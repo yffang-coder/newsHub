@@ -64,6 +64,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/news/**").permitAll() // Allow public access to news
                     .requestMatchers("/api/comments/article/**").permitAll() // Allow public access to read comments
                     .requestMatchers("/api/crawler/**").permitAll() // Allow manual crawler trigger
+                    .requestMatchers("/ws/**").permitAll() // Allow WebSocket connection
                     .requestMatchers("/error").permitAll() // Allow error page to be visible
                     .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                     .anyRequest().authenticated()

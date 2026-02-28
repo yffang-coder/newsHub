@@ -25,6 +25,11 @@ const router = createRouter({
       component: () => import('@/views/Category.vue'),
     },
     {
+      path: '/latest',
+      name: 'latest-news',
+      component: () => import('@/views/LatestNews.vue'),
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/auth/Login.vue'),
@@ -33,6 +38,12 @@ const router = createRouter({
       path: '/register',
       name: 'register',
       component: () => import('@/views/auth/Register.vue'),
+    },
+    {
+      path: '/favorites',
+      name: 'favorites',
+      component: () => import('@/views/user/Favorites.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/admin',
@@ -67,6 +78,11 @@ const router = createRouter({
           path: 'settings',
           name: 'admin-settings',
           component: () => import('@/views/admin/Settings.vue')
+        },
+        {
+          path: 'notifications',
+          name: 'admin-notifications',
+          component: () => import('@/views/admin/Notifications.vue')
         }
       ]
     }

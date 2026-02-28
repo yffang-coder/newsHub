@@ -15,8 +15,11 @@ public interface ArticleMapper {
     @Select("SELECT * FROM articles WHERE id = #{id}")
     Article findById(Long id);
 
-    @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' ORDER BY publish_time DESC LIMIT #{limit}")
-    List<Article> findLatest(int limit);
+    @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' ORDER BY publish_time DESC LIMIT #{limit} OFFSET #{offset}")
+    List<Article> findLatest(@Param("limit") int limit, @Param("offset") int offset);
+
+    @Select("SELECT COUNT(*) FROM articles WHERE status = 'PUBLISHED'")
+    int countPublishedArticles();
     
     @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' AND category_id = #{categoryId} ORDER BY publish_time DESC LIMIT #{limit}")
     List<Article> findByCategory(Long categoryId, int limit);
@@ -39,16 +42,63 @@ public interface ArticleMapper {
     @Select("SELECT COALESCE(SUM(views),0) FROM articles")
     long sumViews();
 
-    @Select("SELECT * FROM articles WHERE (#{keyword} IS NULL OR title LIKE CONCAT('%', #{keyword}, '%')) ORDER BY publish_time DESC LIMIT #{limit} OFFSET #{offset}")
-    java.util.List<Article> findPaged(@Param("offset") int offset, @Param("limit") int limit, @Param("keyword") String keyword);
+    @Select("<script>" +
+            "SELECT a.*, c.name as categoryName FROM articles a " +
+            "LEFT JOIN categories c ON a.category_id = c.id " +
+            "WHERE (#{keyword} IS NULL OR a.title LIKE CONCAT('%', #{keyword}, '%')) " +
+            "AND (#{startDate} IS NULL OR a.publish_time &gt;= #{startDate}) " +
+            "AND (#{endDate} IS NULL OR a.publish_time &lt;= #{endDate}) " +
+            "ORDER BY " +
+            "<choose>" +
+            "  <when test='sortField != null and sortOrder != null'>" +
+            "    ${sortField} ${sortOrder}" +
+            "  </when>" +
+            "  <otherwise>" +
+            "    a.publish_time DESC" +
+            "  </otherwise>" +
+            "</choose>" +
+            " LIMIT #{limit} OFFSET #{offset}" +
+            "</script>")
+    java.util.List<Article> findPaged(@Param("offset") int offset, 
+                                      @Param("limit") int limit, 
+                                      @Param("keyword") String keyword,
+                                      @Param("startDate") String startDate,
+                                      @Param("endDate") String endDate,
+                                      @Param("sortField") String sortField,
+                                      @Param("sortOrder") String sortOrder);
 
-    @Select("SELECT count(*) FROM articles WHERE (#{keyword} IS NULL OR title LIKE CONCAT('%', #{keyword}, '%'))")
-    long countByKeyword(@Param("keyword") String keyword);
+    @Select("SELECT count(*) FROM articles a " +
+            "WHERE (#{keyword} IS NULL OR a.title LIKE CONCAT('%', #{keyword}, '%')) " +
+            "AND (#{startDate} IS NULL OR a.publish_time >= #{startDate}) " +
+            "AND (#{endDate} IS NULL OR a.publish_time <= #{endDate})")
+    long countByKeyword(@Param("keyword") String keyword,
+                        @Param("startDate") String startDate,
+                        @Param("endDate") String endDate);
+
+    @Update("UPDATE articles SET title=#{title}, summary=#{summary}, content=#{content}, " +
+            "cover_image=#{coverImage}, category_id=#{categoryId}, status=#{status}, publish_time=#{publishTime}, updated_at=NOW() " +
+            "WHERE id=#{id}")
+    int update(Article article);
 
     @Delete("DELETE FROM articles WHERE id = #{id}")
     int deleteById(Long id);
 
     @Update("UPDATE articles SET views = COALESCE(views,0) + 1 WHERE id = #{id}")
     int incrementViews(Long id);
+
+    @Select("SELECT c.name as name, COUNT(a.id) as value FROM categories c LEFT JOIN articles a ON c.id = a.category_id GROUP BY c.id")
+    List<java.util.Map<String, Object>> countByCategory();
+
+    @Select("SELECT DATE_FORMAT(publish_time, '%Y-%m-%d') as date, COUNT(*) as count FROM articles WHERE publish_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY) GROUP BY date ORDER BY date ASC")
+    List<java.util.Map<String, Object>> countByDate(int days);
+
+    @Select("SELECT c.name as name, COALESCE(SUM(a.views), 0) as value FROM categories c LEFT JOIN articles a ON c.id = a.category_id GROUP BY c.id")
+    List<java.util.Map<String, Object>> sumViewsByCategory();
+
+    @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' ORDER BY COALESCE(views, 0) DESC, publish_time DESC LIMIT #{limit}")
+    List<Article> findTrending(int limit);
+
+    @Select("SELECT * FROM articles WHERE status = 'PUBLISHED' AND DATE(publish_time) = CURDATE() ORDER BY publish_time DESC LIMIT #{limit}")
+    List<Article> findDailyHighlights(int limit);
 }
 

@@ -23,5 +23,10 @@ public class LocalCacheService implements CacheService {
     public Object get(String key) {
         return cache.get(key);
     }
+
+    @Override
+    public void delete(String key) {
+        cache.remove(key);
+    }
 }
 

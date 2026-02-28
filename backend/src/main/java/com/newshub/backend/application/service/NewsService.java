@@ -20,8 +20,9 @@ public class NewsService {
     private static final String KEY_LATEST_NEWS = "news:latest";
     private static final String KEY_ARTICLE_PREFIX = "news:article:";
 
-    public List<Article> getLatestNews(int limit) {
-        String key = KEY_LATEST_NEWS + ":" + limit;
+    public List<Article> getLatestNews(int page, int pageSize) {
+        int offset = (page - 1) * pageSize;
+        String key = KEY_LATEST_NEWS + ":" + page + ":" + pageSize;
         
         // Try to get from cache
         List<Article> cachedNews = (List<Article>) cacheService.get(key);
@@ -30,7 +31,7 @@ public class NewsService {
         }
 
         // Get from DB
-        List<Article> news = articleMapper.findLatest(limit);
+        List<Article> news = articleMapper.findLatest(pageSize, offset);
         
         // Cache for 5 minutes (Short TTL for high concurrency "latest" updates)
         if (news != null && !news.isEmpty()) {
@@ -38,6 +39,24 @@ public class NewsService {
         }
         
         return news;
+    }
+
+    public List<Article> getDailyHighlights(int limit) {
+        String key = "news:daily-highlights:" + limit;
+        List<Article> cachedHighlights = (List<Article>) cacheService.get(key);
+        if (cachedHighlights != null) {
+            return cachedHighlights;
+        }
+
+        List<Article> highlights = articleMapper.findDailyHighlights(limit);
+        if (highlights != null && !highlights.isEmpty()) {
+            cacheService.set(key, highlights, 30, TimeUnit.MINUTES); // Cache for 30 minutes
+        }
+        return highlights;
+    }
+
+    public int getTotalPublishedArticlesCount() {
+        return articleMapper.countPublishedArticles();
     }
 
     public Article getArticleById(Long id) {
@@ -76,6 +95,20 @@ public class NewsService {
 
     public List<Article> searchArticles(String keyword) {
         return articleMapper.search(keyword);
+    }
+
+    public List<Article> getTrendingNews(int limit) {
+        String key = "news:trending:" + limit;
+        List<Article> cachedNews = (List<Article>) cacheService.get(key);
+        if (cachedNews != null) {
+            return cachedNews;
+        }
+
+        List<Article> news = articleMapper.findTrending(limit);
+        if (news != null && !news.isEmpty()) {
+            cacheService.set(key, news, 10, TimeUnit.MINUTES); // Cache for 10 minutes
+        }
+        return news;
     }
 }
 

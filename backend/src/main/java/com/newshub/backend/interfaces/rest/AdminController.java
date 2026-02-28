@@ -71,8 +71,30 @@ public class AdminController {
     @GetMapping("/articles")
     public ResponseEntity<Map<String, Object>> getArticles(@RequestParam(defaultValue = "1") int page,
                                                            @RequestParam(defaultValue = "10") int size,
-                                                           @RequestParam(required = false) String keyword) {
-        return ResponseEntity.ok(adminService.getArticlesPaged(page, size, keyword));
+                                                           @RequestParam(required = false) String keyword,
+                                                           @RequestParam(required = false) String startDate,
+                                                           @RequestParam(required = false) String endDate,
+                                                           @RequestParam(required = false) String sortField,
+                                                           @RequestParam(required = false) String sortOrder) {
+        return ResponseEntity.ok(adminService.getArticlesPaged(page, size, keyword, startDate, endDate, sortField, sortOrder));
+    }
+
+    @PostMapping("/articles")
+    public ResponseEntity<?> createArticle(@RequestBody com.newshub.backend.domain.model.Article article) {
+        adminService.createArticle(article);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/articles/{id}")
+    public ResponseEntity<?> updateArticle(@PathVariable Long id, @RequestBody com.newshub.backend.domain.model.Article article) {
+        article.setId(id);
+        adminService.updateArticle(article);
+        return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/categories")
+    public ResponseEntity<List<com.newshub.backend.domain.model.Category>> getCategories() {
+        return ResponseEntity.ok(adminService.getAllCategories());
     }
 
     @DeleteMapping("/articles/{id}")

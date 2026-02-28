@@ -1,31 +1,37 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { Clock, ArrowRight } from '@element-plus/icons-vue';
-import { getFeaturedNews, getTrendingNews, getLatestNews, searchNews, type NewsItem } from '@/api/news';
+import { Clock, ArrowRight, User, Close } from '@element-plus/icons-vue';
+import { getFeaturedNews, getTrendingNews, getLatestNews, getLatestNewsCount, searchNews, type NewsItem } from '@/api/news';
 import WeatherWidget from '@/components/WeatherWidget.vue';
 import HoroscopeWidget from '@/components/HoroscopeWidget.vue';
 
 const router = useRouter();
 const route = useRoute();
 const isSearching = ref(false);
+const loading = ref(false);
+
+const searchQuery = computed(() => route.query.q as string || '');
 
 const handleSearch = async (query: string) => {
   if (!query || !query.trim()) {
-    // If empty, reset to latest news
     fetchNews();
     return;
   }
   
-  isSearching.value = true;
+  loading.value = true;
   try {
     const results = await searchNews(query);
     latestNews.value = results;
   } catch (e) {
     console.error(e);
   } finally {
-    isSearching.value = false;
+    loading.value = false;
   }
+};
+
+const clearSearch = () => {
+  router.push({ name: 'home' });
 };
 
 watch(() => route.query.q, (newQuery) => {
@@ -37,23 +43,31 @@ watch(() => route.query.q, (newQuery) => {
 });
 
 const fetchNews = async () => {
+  loading.value = true;
   try {
-    const [featured, trending, latest] = await Promise.all([
+    const [featured, trending, latest, count] = await Promise.all([
       getFeaturedNews(),
-      getTrendingNews(),
-      getLatestNews()
+      getTrendingNews(5),
+      getLatestNews(currentPage.value, pageSize.value),
+      getLatestNewsCount()
     ]);
     featuredNews.value = featured;
     trendingNews.value = trending;
     latestNews.value = latest;
+    totalArticles.value = count;
   } catch (error) {
     console.error('Failed to fetch news:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
 const featuredNews = ref<NewsItem | null>(null);
 const trendingNews = ref<NewsItem[]>([]);
 const latestNews = ref<NewsItem[]>([]);
+const currentPage = ref(1);
+const pageSize = ref(9); // Display 9 articles per page
+const totalArticles = ref(0);
 
 onMounted(() => {
   if (route.query.q && typeof route.query.q === 'string') {
@@ -66,20 +80,24 @@ onMounted(() => {
 const navigateToArticle = (id: number) => {
   router.push(`/article/${id}`);
 };
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page;
+  fetchNews();
+};
 </script>
 
 <template>
   <main class="container mx-auto px-4 py-6">
 
 
-    <!-- Hero Section -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
+    <!-- Hero Section (Hidden during search) -->
+    <section v-if="!searchQuery" class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-4">
       
       <!-- Main Featured Article -->
-      <div class="lg:col-span-8">
+      <div v-if="featuredNews" class="lg:col-span-8 self-start">
 
         <div 
-          v-if="featuredNews" 
           class="group cursor-pointer"
           @click="navigateToArticle(featuredNews.id)"
         >
@@ -101,7 +119,9 @@ const navigateToArticle = (id: number) => {
                 <el-icon><Clock /></el-icon> {{ featuredNews.date }}
               </span>
               <span>•</span>
-              <span>{{ featuredNews.author }}</span>
+              <span class="flex items-center gap-1">
+                <el-icon><User /></el-icon> {{ featuredNews.author }}
+              </span>
             </div>
             <h1 class="text-3xl md:text-4xl font-bold leading-tight group-hover:text-primary/80 transition-colors">
               {{ featuredNews.title }}
@@ -114,10 +134,7 @@ const navigateToArticle = (id: number) => {
       </div>
 
       <!-- Sidebar -->
-      <div class="lg:col-span-4 space-y-8">
-        <!-- Weather Widget -->
-        <WeatherWidget />
-
+      <div :class="{'lg:col-span-12': !featuredNews, 'lg:col-span-4': featuredNews}" class="space-y-8">
         <!-- Horoscope Widget -->
         <HoroscopeWidget />
 
@@ -125,7 +142,7 @@ const navigateToArticle = (id: number) => {
         <div class="bg-card rounded-xl border border-border p-6 shadow-sm">
           <div class="flex items-center justify-between border-b border-border pb-4 mb-4">
             <h2 class="text-xl font-bold text-primary">热门新闻</h2>
-            <RouterLink to="/trending" class="text-sm text-accent hover:underline no-underline">查看更多</RouterLink>
+            <RouterLink :to="{ name: 'latest-news' }" class="text-sm text-accent hover:underline no-underline ">查看更多</RouterLink>
           </div>
           <div class="space-y-6">
             <div 
@@ -141,36 +158,45 @@ const navigateToArticle = (id: number) => {
                   <h3 class="font-semibold leading-snug group-hover:text-primary/80 transition-colors">
                     {{ news.title }}
                   </h3>
-                  <span class="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    <el-icon><Clock /></el-icon> {{ news.date }}
-                  </span>
+                  <div class="text-xs text-muted-foreground flex items-center gap-3 mt-1">
+                    <span class="flex items-center gap-1">
+                      <el-icon><Clock /></el-icon> {{ news.date }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <el-icon><User /></el-icon> {{ news.author }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        <!-- Ad Placeholder -->
-        <div class="bg-secondary/50 rounded-lg p-6 text-center space-y-2">
-          <p class="text-xs text-muted-foreground uppercase tracking-widest">Advertisement</p>
-          <p class="font-semibold text-primary">订阅 NewsHub Pro</p>
-          <p class="text-sm text-muted-foreground">获取无广告阅读体验和深度独家报道</p>
-          <el-button link type="primary" class="!text-accent hover:underline">立即订阅 &rarr;</el-button>
-        </div>
       </div>
     </section>
 
+    <!-- Search Status (Shown only during search) -->
+    <section v-if="searchQuery" class="mb-8">
+      <div class="flex items-center justify-between bg-secondary/30 p-4 rounded-xl">
+        <div class="flex items-center gap-2">
+          <span class="text-muted-foreground">搜索结果:</span>
+          <span class="font-bold text-primary">"{{ searchQuery }}"</span>
+          <span v-if="latestNews.length > 0" class="text-xs text-muted-foreground ml-2">共找到 {{ latestNews.length }} 条相关文章</span>
+          <span v-else class="text-xs text-red-500 ml-2">未找到相关文章</span>
+        </div>
+        <el-button :icon="Close" circle size="small" @click="clearSearch" title="清除搜索" />
+      </div>
+    </section>
 
-    <!-- Latest News Grid -->
+    <!-- Content Grid -->
     <section>
-      <div class="flex items-center justify-between border-b border-border pb-2 mb-4">
+      <div v-if="!searchQuery" class="flex items-center justify-between border-b border-border pb-2 mb-4">
         <h2 class="text-2xl font-bold text-primary">最新发布</h2>
-        <RouterLink to="/latest" class="group flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors no-underline">
+        <RouterLink :to="{ name: 'latest-news' }" class="group flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors no-underline">
           全部新闻 <el-icon class="transition-transform group-hover:translate-x-1"><ArrowRight /></el-icon>
         </RouterLink>
       </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div v-if="latestNews.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <article 
           v-for="news in latestNews" 
           :key="news.id" 
@@ -189,6 +215,10 @@ const navigateToArticle = (id: number) => {
               <span class="text-accent">{{ news.category }}</span>
               <span class="text-muted-foreground">•</span>
               <span class="text-muted-foreground">{{ news.date }}</span>
+              <span class="text-muted-foreground">•</span>
+              <span class="flex items-center gap-1 text-muted-foreground">
+                <el-icon><User /></el-icon> {{ news.author }}
+              </span>
             </div>
             <h3 class="text-xl font-bold mb-2 leading-snug group-hover:text-primary/80 transition-colors">
               {{ news.title }}
@@ -201,6 +231,24 @@ const navigateToArticle = (id: number) => {
             </div>
           </div>
         </article>
+      </div>
+
+      <!-- Pagination -->
+      <div v-if="!searchQuery && totalArticles > pageSize" class="flex justify-center mt-8">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="totalArticles"
+          :page-size="pageSize"
+          :current-page="currentPage"
+          @current-change="handlePageChange"
+        />
+      </div>
+
+      <!-- No Results State for Latest News (Non-search) -->
+      <div v-else-if="!loading && !searchQuery && latestNews.length === 0" class="py-20 text-center">
+        <el-empty description="暂无新闻" />
+        <el-button type="primary" link @click="router.push({ name: 'latest-news' })">查看全部新闻</el-button>
       </div>
     </section>
   </main>

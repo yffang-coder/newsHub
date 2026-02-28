@@ -19,10 +19,18 @@ public class NewsController {
     @Autowired
     private NewsService newsService;
 
-    @Operation(summary = "Get latest news", description = "Returns a list of latest published articles")
+    @Operation(summary = "Get latest news", description = "Returns a list of latest published articles with pagination")
     @GetMapping("/latest")
-    public ResponseEntity<List<Article>> getLatestNews(@RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(newsService.getLatestNews(limit));
+    public ResponseEntity<List<Article>> getLatestNews(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return ResponseEntity.ok(newsService.getLatestNews(page, pageSize));
+    }
+
+    @Operation(summary = "Get total count of latest news", description = "Returns the total count of published articles")
+    @GetMapping("/latest/count")
+    public ResponseEntity<Integer> getLatestNewsCount() {
+        return ResponseEntity.ok(newsService.getTotalPublishedArticlesCount());
     }
 
     @Operation(summary = "Get article details", description = "Returns full details of an article by ID")
@@ -53,6 +61,18 @@ public class NewsController {
     @GetMapping("/search")
     public ResponseEntity<List<Article>> searchNews(@RequestParam String q) {
         return ResponseEntity.ok(newsService.searchArticles(q));
+    }
+
+    @Operation(summary = "Get trending news", description = "Returns a list of trending articles based on views")
+    @GetMapping("/trending")
+    public ResponseEntity<List<Article>> getTrendingNews(@RequestParam(defaultValue = "5") int limit) {
+        return ResponseEntity.ok(newsService.getTrendingNews(limit));
+    }
+
+    @Operation(summary = "Get daily highlights", description = "Returns a list of daily highlight articles")
+    @GetMapping("/daily-highlights")
+    public ResponseEntity<List<Article>> getDailyHighlights(@RequestParam(defaultValue = "3") int limit) {
+        return ResponseEntity.ok(newsService.getDailyHighlights(limit));
     }
 }
 

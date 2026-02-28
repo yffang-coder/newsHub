@@ -10,16 +10,21 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@stomp/stompjs": "^7.3.0",
     "@types/marked": "^6.0.0",
     "axios": "^1.7.9",
+    "echarts": "^6.0.0",
     "element-plus": "^2.9.3",
     "marked": "^17.0.1",
+    "net": "^1.0.2",
     "pinia": "^3.0.4",
+    "sockjs-client": "^1.6.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.7",
+    "@types/sockjs-client": "^1.5.4",
     "@vitejs/plugin-vue": "^5.2.1",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",

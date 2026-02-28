@@ -20,5 +20,8 @@ public class Article {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    // Transient fields
+    private String categoryName;
 }
 

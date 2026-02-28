@@ -1,0 +1,16 @@
+package com.newshub.backend.domain.model;
+
+import lombok.Data;
+import java.time.LocalDateTime;
+
+@Data
+public class Notification {
+    private Long id;
+    private Long userId;
+    private String title;
+    private String content;
+    private String type; // SYSTEM, COMMENT, LIKE
+    private Boolean isRead;
+    private Long relatedId;
+    private LocalDateTime createdAt;
+}

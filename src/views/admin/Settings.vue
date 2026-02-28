@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
+import { Refresh } from '@element-plus/icons-vue';
 import { getSettings, updateSettings } from '@/api/admin';
 
 const form = ref<Record<string, string>>({
@@ -30,8 +31,8 @@ const selectedPageKey = ref('about_content');
 const fetchSettings = async () => {
   loading.value = true;
   try {
-    const data = await getSettings();
-    form.value = { ...form.value, ...data };
+    const { data } = await getSettings();
+    form.value = { ...form.value, ...data as Record<string, string> };
   } catch (error) {
     ElMessage.error('获取设置失败');
   } finally {
@@ -60,6 +61,7 @@ onMounted(() => {
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-primary">系统设置</h2>
+      <el-button :icon="Refresh" circle @click="fetchSettings" :loading="loading" />
     </div>
 
     <el-tabs v-model="activeTab" class="max-w-4xl">

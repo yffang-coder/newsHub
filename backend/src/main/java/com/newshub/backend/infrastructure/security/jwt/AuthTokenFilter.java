@@ -2,6 +2,7 @@ package com.newshub.backend.infrastructure.security.jwt;
 
 import com.newshub.backend.infrastructure.utils.JwtUtils;
 import com.newshub.backend.application.service.UserDetailsServiceImpl;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,6 +43,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("JWT token is expired");
+            return;
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);
         }

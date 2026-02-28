@@ -28,5 +28,8 @@ public interface CommentMapper {
 
     @Select("SELECT count(*) FROM comments WHERE DATE(created_at) = CURRENT_DATE")
     long countToday();
+
+    @Select("SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count FROM comments WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY) GROUP BY date ORDER BY date ASC")
+    List<java.util.Map<String, Object>> countByDate(int days);
 }
 

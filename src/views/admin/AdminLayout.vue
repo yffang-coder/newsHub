@@ -9,7 +9,8 @@ import {
   Fold, 
   Expand,
   Monitor,
-  ChatDotRound
+  ChatDotRound,
+  Bell
 } from '@element-plus/icons-vue';
 
 const route = useRoute();
@@ -57,6 +58,10 @@ const handleCommand = (command: string) => {
         <el-menu-item index="/admin/users">
           <el-icon><User /></el-icon>
           <template #title>用户管理</template>
+        </el-menu-item>
+        <el-menu-item index="/admin/notifications">
+          <el-icon><Bell /></el-icon>
+          <template #title>通知管理</template>
         </el-menu-item>
         <el-menu-item index="/admin/settings">
           <el-icon><Setting /></el-icon>

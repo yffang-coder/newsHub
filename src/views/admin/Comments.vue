@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { Delete } from '@element-plus/icons-vue';
+import { Delete, Refresh } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getComments, deleteComment } from '@/api/admin';
 
@@ -13,7 +13,7 @@ const comments = ref<any[]>([]);
 const fetchComments = async () => {
   loading.value = true;
   try {
-    const data = await getComments(currentPage.value, pageSize.value);
+    const { data } = await getComments(currentPage.value, pageSize.value);
     comments.value = data.items || [];
     total.value = data.total || 0;
   } catch (e) {
@@ -51,7 +51,7 @@ watch([currentPage, pageSize], fetchComments);
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-primary">评论管理</h2>
-      <el-button type="primary" @click="fetchComments">刷新列表</el-button>
+      <el-button :icon="Refresh" circle @click="fetchComments" :loading="loading" />
     </div>
 
     <el-card shadow="hover" class="!border-none">

@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { User, Share, Star } from '@element-plus/icons-vue';
-import { getArticleDetail, getRelatedNews, type ArticleDetail, type NewsItem } from '@/api/news';
+import { User, Star, StarFilled } from '@element-plus/icons-vue';
+import { getArticleDetail, getRelatedNews, checkFavorite, toggleFavorite, type ArticleDetail, type NewsItem } from '@/api/news';
 import CommentSection from '@/components/CommentSection.vue';
+import { useUserStore } from '@/stores/user';
+import { ElMessage } from 'element-plus';
 
 const route = useRoute();
 const router = useRouter();
+const userStore = useUserStore();
 const article = ref<ArticleDetail | null>(null);
 const relatedNews = ref<NewsItem[]>([]);
 const loading = ref(true);
+const isFavorite = ref(false);
 
 onMounted(async () => {
   const id = route.params.id as string;
@@ -17,6 +21,11 @@ onMounted(async () => {
     try {
       article.value = await getArticleDetail(id);
       relatedNews.value = await getRelatedNews(id);
+      
+      if (userStore.token) {
+          const res = await checkFavorite(Number(id)) as any;
+          isFavorite.value = res.favorited;
+      }
     } catch (error) {
       console.error('Failed to fetch article:', error);
     } finally {
@@ -38,6 +47,23 @@ const navigateToCategory = (id?: number) => {
     router.push(`/category/${id}`);
   }
 };
+
+const handleFavorite = async () => {
+    if (!userStore.token) {
+        ElMessage.warning('请先登录');
+        router.push('/login');
+        return;
+    }
+    if (!article.value) return;
+    
+    try {
+        const res = await toggleFavorite(article.value.id) as any;
+        isFavorite.value = res.favorited;
+        ElMessage.success(isFavorite.value ? '收藏成功' : '已取消收藏');
+    } catch (error) {
+        ElMessage.error('操作失败');
+    }
+}
 </script>
 
 <template>
@@ -86,11 +112,17 @@ const navigateToCategory = (id?: number) => {
           <div class="text-xs text-muted-foreground">{{ article.authorRole }}</div>
         </div>
         <div class="flex flex-col gap-3">
-          <el-button round class="w-full !ml-0">
-            <el-icon class="mr-2"><Share /></el-icon> 分享
-          </el-button>
-          <el-button round class="w-full !ml-0">
-            <el-icon class="mr-2"><Star /></el-icon> 收藏
+          <el-button 
+            round 
+            class="w-full !ml-0" 
+            :type="isFavorite ? 'warning' : 'default'"
+            @click="handleFavorite"
+          >
+            <el-icon class="mr-2">
+                <StarFilled v-if="isFavorite" />
+                <Star v-else />
+            </el-icon> 
+            {{ isFavorite ? '已收藏' : '收藏' }}
           </el-button>
         </div>
       </aside>
@@ -109,11 +141,15 @@ const navigateToCategory = (id?: number) => {
             </div>
           </div>
           <div class="flex gap-2">
-            <el-button circle>
-              <el-icon><Share /></el-icon>
-            </el-button>
-            <el-button circle>
-              <el-icon><Star /></el-icon>
+            <el-button 
+                circle 
+                :type="isFavorite ? 'warning' : 'default'"
+                @click="handleFavorite"
+            >
+              <el-icon>
+                  <StarFilled v-if="isFavorite" />
+                  <Star v-else />
+              </el-icon>
             </el-button>
           </div>
         </div>

@@ -67,9 +67,9 @@ export const getFeaturedNews = async () => {
   }
 };
 
-export const getTrendingNews = async () => {
+export const getTrendingNews = async (limit: number = 5) => {
   try {
-    const res = await request.get('/news/latest?limit=5') as any;
+    const res = await request.get(`/news/trending?limit=${limit}`) as any;
     if (Array.isArray(res)) {
       return res.map((item: any) => ({
           id: item.id,
@@ -89,9 +89,31 @@ export const getTrendingNews = async () => {
   }
 };
 
-export const getLatestNews = async () => {
+export const getDailyHighlights = async (limit: number = 3) => {
   try {
-    const res = await request.get('/news/latest?limit=10') as any;
+    const res = await request.get(`/news/daily-highlights?limit=${limit}`) as any;
+    if (Array.isArray(res)) {
+      return res.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          excerpt: item.summary,
+          category: getCategoryName(item.categoryId),
+          categoryId: item.categoryId,
+          date: formatDate(item.publishTime),
+          author: item.sourceName || 'NewsHub',
+          image: item.coverImage
+      })) as NewsItem[];
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching daily highlights:', error);
+    return [];
+  }
+};
+
+export const getLatestNews = async (page: number = 1, pageSize: number = 10) => {
+  try {
+    const res = await request.get(`/news/latest?page=${page}&pageSize=${pageSize}`) as any;
     if (Array.isArray(res)) {
       return res.map((item: any) => ({
           id: item.id,
@@ -108,6 +130,16 @@ export const getLatestNews = async () => {
   } catch (error) {
     console.error('Error fetching latest news:', error);
     return [];
+  }
+};
+
+export const getLatestNewsCount = async () => {
+  try {
+    const res = await request.get('/news/latest/count') as number;
+    return res;
+  } catch (error) {
+    console.error('Error fetching latest news count:', error);
+    return 0;
   }
 };
 
@@ -179,10 +211,6 @@ export const getNbaNews = async () => {
 
 export const getNewsByCategory = async (categoryId: number, _page: number = 1, pageSize: number = 20) => {
   try {
-    // Backend likely supports pagination, or at least limit
-    // Assuming /news/category/{id}?page={page}&limit={limit}
-    // If backend doesn't support pagination params on this endpoint, we might just get a list.
-    // Based on getNbaNews, it uses limit.
     const res = await request.get(`/news/category/${categoryId}?limit=${pageSize}`) as any;
     if (Array.isArray(res)) {
       return res.map((item: any) => ({
@@ -204,23 +232,59 @@ export const getNewsByCategory = async (categoryId: number, _page: number = 1, p
 };
 
 export const getRelatedNews = async (id: number | string) => {
-  try {
-    const res = await request.get(`/news/${id}/related?limit=5`) as any;
-    if (Array.isArray(res)) {
-      return res.map((item: any) => ({
-          id: item.id,
-          title: item.title,
-          excerpt: item.summary,
-          category: getCategoryName(item.categoryId),
-          categoryId: item.categoryId,
-          date: formatDate(item.publishTime),
-          author: item.sourceName || 'NewsHub',
-          image: item.coverImage
-      })) as NewsItem[];
+    try {
+        // For now, just return latest news as related
+        // In a real app, this would be a specific API endpoint
+        const res = await request.get('/news/latest?limit=4') as any;
+         if (Array.isArray(res)) {
+            return res
+                .filter((item: any) => String(item.id) !== String(id))
+                .slice(0, 3)
+                .map((item: any) => ({
+                    id: item.id,
+                    title: item.title,
+                    excerpt: item.summary,
+                    category: getCategoryName(item.categoryId),
+                    categoryId: item.categoryId,
+                    date: formatDate(item.publishTime),
+                    author: item.sourceName || 'NewsHub',
+                    image: item.coverImage
+                })) as NewsItem[];
+        }
+        return [];
+    } catch (error) {
+        console.error('Error fetching related news:', error);
+        return [];
     }
-    return [];
-  } catch (error) {
-    console.error(`Error fetching related news for article ${id}:`, error);
-    return [];
-  }
-};
+}
+
+export const checkFavorite = async (articleId: number) => {
+    return request.get(`/favorites/check/${articleId}`);
+}
+
+export const toggleFavorite = async (articleId: number) => {
+    return request.post(`/favorites/toggle/${articleId}`);
+}
+
+export const getFavorites = async () => {
+    try {
+        const res = await request.get('/favorites') as any;
+        if (Array.isArray(res)) {
+            return res.map((item: any) => ({
+                id: item.id,
+                title: item.title,
+                excerpt: item.summary,
+                category: getCategoryName(item.categoryId),
+                categoryId: item.categoryId,
+                date: formatDate(item.publishTime),
+                author: item.sourceName || 'NewsHub',
+                image: item.coverImage
+            })) as NewsItem[];
+        }
+        return [];
+    } catch (error) {
+        console.error('Error fetching favorites:', error);
+        return [];
+    }
+}
+;

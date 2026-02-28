@@ -28,6 +28,12 @@ public class AdminService {
     @Autowired
     private CommentMapper commentMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
+    @Autowired
+    private com.newshub.backend.infrastructure.persistence.CategoryMapper categoryMapper;
+
     public Map<String, Object> getDashboardStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalUsers", userMapper.count());
@@ -35,9 +41,17 @@ public class AdminService {
         stats.put("totalVisits", articleMapper.sumViews());
         stats.put("todayComments", commentMapper.countToday());
         
+        // Add charts data
+        stats.put("articleTrend", articleMapper.countByDate(7));
+        stats.put("commentTrend", commentMapper.countByDate(7));
+        stats.put("categoryDistribution", articleMapper.countByCategory());
+        stats.put("visitsByCategory", articleMapper.sumViewsByCategory());
+
         // Add recent activity
-        stats.put("recentArticles", articleMapper.findPaged(0, 5, null));
+        stats.put("recentArticles", articleMapper.findPaged(0, 5, null, null, null, null, null));
         stats.put("recentComments", commentMapper.findAllPaged(0, 5));
+
+        stats.put("topArticlesByViews", articleMapper.findTrending(5));
         
         return stats;
     }
@@ -86,10 +100,25 @@ public class AdminService {
         commentMapper.deleteById(id);
     }
 
-    public Map<String, Object> getArticlesPaged(int page, int size, String keyword) {
+    public Map<String, Object> getArticlesPaged(int page, int size, String keyword, String startDate, String endDate, String sortField, String sortOrder) {
         int offset = (page - 1) * size;
-        java.util.List<com.newshub.backend.domain.model.Article> list = articleMapper.findPaged(offset, size, keyword);
-        long total = articleMapper.countByKeyword(keyword);
+        
+        // Map frontend field names to database columns
+        String dbSortField = null;
+        if ("publishTime".equals(sortField)) {
+            dbSortField = "a.publish_time";
+        }
+        
+        // Sanitize sort order
+        String dbSortOrder = null;
+        if ("ascending".equals(sortOrder)) {
+            dbSortOrder = "ASC";
+        } else if ("descending".equals(sortOrder)) {
+            dbSortOrder = "DESC";
+        }
+
+        java.util.List<com.newshub.backend.domain.model.Article> list = articleMapper.findPaged(offset, size, keyword, startDate, endDate, dbSortField, dbSortOrder);
+        long total = articleMapper.countByKeyword(keyword, startDate, endDate);
         Map<String, Object> result = new HashMap<>();
         result.put("items", list);
         result.put("total", total);
@@ -98,5 +127,32 @@ public class AdminService {
 
     public void deleteArticle(Long id) {
         articleMapper.deleteById(id);
+        clearNewsCache(id);
+    }
+
+    public void createArticle(com.newshub.backend.domain.model.Article article) {
+        if (article.getPublishTime() == null) {
+            article.setPublishTime(java.time.LocalDateTime.now());
+        }
+        articleMapper.insert(article);
+        clearNewsCache(article.getId());
+    }
+
+    public void updateArticle(com.newshub.backend.domain.model.Article article) {
+        articleMapper.update(article);
+        clearNewsCache(article.getId());
+    }
+
+    private void clearNewsCache(Long articleId) {
+        cacheService.delete("news:latest:1");
+        cacheService.delete("news:latest:5");
+        cacheService.delete("news:latest:10");
+        if (articleId != null) {
+            cacheService.delete("news:article:" + articleId);
+        }
+    }
+
+    public List<com.newshub.backend.domain.model.Category> getAllCategories() {
+        return categoryMapper.findAll();
     }
 }

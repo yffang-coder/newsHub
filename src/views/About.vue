@@ -14,7 +14,7 @@ const loadContent = async () => {
   loading.value = true;
   try {
     const key = `${activeTab.value}_content`;
-    const res = await getPublicSetting(key);
+    const res = await getPublicSetting(key) as string;
     content.value = await marked.parse(res || '');
   } catch (e) {
     content.value = '<p>暂无内容</p>';

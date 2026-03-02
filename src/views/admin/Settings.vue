@@ -31,8 +31,8 @@ const selectedPageKey = ref('about_content');
 const fetchSettings = async () => {
   loading.value = true;
   try {
-    const { data } = await getSettings();
-    form.value = { ...form.value, ...data as Record<string, string> };
+    const data = await getSettings() as any;
+    form.value = { ...form.value, ...(data as Record<string, string>) };
   } catch (error) {
     ElMessage.error('获取设置失败');
   } finally {

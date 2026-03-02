@@ -10,8 +10,8 @@ const loading = ref(false);
 const fetchUsers = async () => {
   loading.value = true;
   try {
-    const { data } = await getAllUsers();
-    users.value = data;
+    const data = await getAllUsers() as any;
+    users.value = data || [];
   } catch (error) {
     ElMessage.error('获取用户列表失败');
   } finally {

@@ -152,13 +152,13 @@ const handleLogin = async () => {
       }
     }
     
-    localStorage.setItem('token', res.token);
-    localStorage.setItem('user', JSON.stringify({
+    userStore.setToken(res.token);
+    userStore.setUser({
       id: res.id,
       name: res.username,
       email: res.email,
       role: res.roles.includes('ROLE_ADMIN') ? 'admin' : 'user'
-    }));
+    });
     
     ElMessage.success('登录成功');
     router.push('/');
@@ -197,13 +197,13 @@ const handleCompleteProfile = async () => {
       password: profileForm.password
     });
 
-    localStorage.setItem('token', res.token);
-    localStorage.setItem('user', JSON.stringify({
+    userStore.setToken(res.token);
+    userStore.setUser({
       id: res.id,
       name: res.username,
       email: res.email,
       role: res.roles.includes('ROLE_ADMIN') ? 'admin' : 'user'
-    }));
+    });
     
     ElMessage.success('注册成功，已自动登录');
     router.push('/');

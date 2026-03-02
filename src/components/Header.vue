@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search, Menu as MenuIcon, Monitor, Star, Moon, Sunny, Bell, Location, Sunny as SunnyIcon } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { getUnreadCount, getNotifications, markAsRead, markAllAsRead, type Notification } from '@/api/notification'
 import { getDailyHighlights, type NewsItem } from '@/api/news'
 import { getWeatherByIp, type WeatherData } from '@/api/weather'
+import { useUserStore } from '@/stores/user'
 import SockJS from 'sockjs-client/dist/sockjs';
 import { Stomp } from '@stomp/stompjs';
 
 const router = useRouter();
+const userStore = useUserStore();
 const searchQuery = ref('');
-const currentUser = ref<any>(null);
+const currentUser = computed(() => {
+  const u: any = userStore.user;
+  return u && u.id ? u : null;
+});
 const isDark = ref(false);
 
 const unreadCount = ref(0);
@@ -25,12 +30,12 @@ const dailyHighlights = ref<NewsItem[]>([]);
 const connectWebSocket = () => {
   if (!currentUser.value) return;
 
-  const socket = new SockJS('http://localhost:8080/ws');
+  const wsUrl = (import.meta as any).env?.VITE_WS_URL || '/ws';
+  const socket = new SockJS(wsUrl);
   stompClient = Stomp.over(socket);
-  stompClient.debug = () => {}; // Disable debug logs
+  stompClient.debug = () => {};
 
   stompClient.connect({}, () => {
-    // Subscribe to user-specific notifications
     stompClient.subscribe(`/topic/notifications/${currentUser.value.id}`, (message: any) => {
       const notification = JSON.parse(message.body);
       notifications.value.unshift(notification);
@@ -100,33 +105,12 @@ const handleSearch = () => {
   }
 };
 
-const checkUser = () => {
-  const userStr = localStorage.getItem('user');
-  if (userStr) {
-    currentUser.value = JSON.parse(userStr);
-  } else {
-    currentUser.value = null;
-  }
-};
-
 const handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  currentUser.value = null;
+  userStore.logout();
   router.push('/login');
 };
 
-let intervalId: any;
-
 onMounted(() => {
-  checkUser();
-  
-  if (currentUser.value) {
-    loadNotifications();
-    connectWebSocket();
-  }
-
-  // Fetch weather and daily highlights
   getWeatherByIp().then(data => {
     if (data && data.length > 0) {
       weatherInfo.value = data[0];
@@ -147,14 +131,23 @@ onMounted(() => {
     isDark.value = false;
     document.documentElement.classList.remove('dark');
   }
-
-  // Simple polling for auth state changes in this simplified implementation
-  // In a real app, use Pinia or an Event Bus
-  intervalId = setInterval(checkUser, 1000);
 });
 
+watch(
+  () => currentUser.value?.id,
+  async () => {
+    disconnectWebSocket();
+    notifications.value = [];
+    unreadCount.value = 0;
+    if (currentUser.value) {
+      await loadNotifications();
+      connectWebSocket();
+    }
+  },
+  { immediate: true }
+);
+
 onUnmounted(() => {
-  if (intervalId) clearInterval(intervalId);
   disconnectWebSocket();
 });
 </script>

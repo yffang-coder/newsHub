@@ -317,7 +317,7 @@ const updateCharts = (data: any) => {
 const refreshData = async () => {
   loading.value = true;
   try {
-    const { data } = await getDashboardStats();
+    const data = await getDashboardStats() as any;
     stats.value = stats.value.map(stat => ({
       ...stat,
       value: data[stat.key]?.toString() || '0'

@@ -32,7 +32,7 @@ const articleForm = ref({
 
 const fetchCategories = async () => {
   try {
-    const { data } = await getCategories();
+    const data = await getCategories() as any;
     categories.value = data || [];
   } catch (e) {
     console.error('Failed to fetch categories', e);
@@ -43,7 +43,7 @@ const fetchArticles = async () => {
   loading.value = true;
   try {
     const [startDate, endDate] = dateRange.value || [];
-    const { data } = await getArticles(
+    const data = await getArticles(
       currentPage.value, 
       pageSize.value, 
       searchQuery.value.trim() || undefined,
@@ -51,9 +51,9 @@ const fetchArticles = async () => {
       endDate,
       sortField.value,
       sortOrder.value
-    );
-    articles.value = data.items || [];
-    total.value = data.total || 0;
+    ) as any;
+    articles.value = data?.items || [];
+    total.value = data?.total || 0;
   } catch (e) {
     ElMessage.error('获取文章列表失败');
   } finally {

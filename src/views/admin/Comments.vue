@@ -13,9 +13,9 @@ const comments = ref<any[]>([]);
 const fetchComments = async () => {
   loading.value = true;
   try {
-    const { data } = await getComments(currentPage.value, pageSize.value);
-    comments.value = data.items || [];
-    total.value = data.total || 0;
+    const data = await getComments(currentPage.value, pageSize.value) as any;
+    comments.value = data?.items || [];
+    total.value = data?.total || 0;
   } catch (e) {
     ElMessage.error('获取评论列表失败');
   } finally {
@@ -91,4 +91,3 @@ watch([currentPage, pageSize], fetchComments);
     </el-card>
   </div>
 </template>
-

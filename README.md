@@ -3,6 +3,7 @@
 NewsHub 是一个基于现代化技术栈构建的全栈新闻聚合平台。它通过自动化的 Python 爬虫系统抓取多源新闻，利用 Spring Boot 后端进行高效处理与存储，并通过 Vue 3 构建的高性能前端界面为用户提供极致的阅读体验。
 
 ---
+在线网站：https://news.yffxdq.cloud/
 
 ## 🌟 核心功能
 
@@ -26,6 +27,17 @@ NewsHub 是一个基于现代化技术栈构建的全栈新闻聚合平台。它
 - **消息推送**：管理员可向特定用户或全站用户发送通知。
 
 ---
+## 🚢 ue 展示
+## 客户端
+<img width="1564" height="943" alt="image" src="https://github.com/user-attachments/assets/88c1673f-c70e-443f-b682-1c3b1c6864fb" />
+
+<img width="1555" height="949" alt="image" src="https://github.com/user-attachments/assets/e16c35c2-3d26-4107-9331-6c4be5efd8ab" />
+
+## 管理端
+<img width="1897" height="954" alt="image" src="https://github.com/user-attachments/assets/f7baf84b-8755-4bfd-8098-69bbc435652f" />
+
+<img width="1876" height="838" alt="image" src="https://github.com/user-attachments/assets/714b2802-93ff-4c38-bb3a-8974b492a20a" />
+
 
 ## 🛠 技术架构
 

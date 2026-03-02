@@ -52,27 +52,22 @@ def fetch_weather(city):
 
 def run(target_city=None):
     log("Starting weather crawl...")
-    results = []
     cities_to_crawl = [target_city] if target_city else PROVINCES
 
     for city in cities_to_crawl:
         data = fetch_weather(city)
         if data:
-            results.append(data)
             log(f"Fetched {city}: {data['type']} {data['low']}~{data['high']}")
+            # Push to backend for each city
+            try:
+                backend_api_url = f"{BACKEND_API_BASE_URL}?city={city}"
+                resp = requests.post(backend_api_url, json=[data], timeout=10)
+                log(f"Posted {city} to backend: {resp.status_code}")
+            except Exception as e:
+                log(f"Error posting {city} to backend: {e}")
         else:
             log(f"Failed to fetch {city}")
         time.sleep(1) # Be polite
-
-    # Push to backend
-    if results:
-        try:
-            # Append city parameter to the URL
-            backend_api_url = f"{BACKEND_API_BASE_URL}?city={target_city if target_city else '上海'}"
-            resp = requests.post(backend_api_url, json=results, timeout=10)
-            log(f"Posted to backend: {resp.status_code}")
-        except Exception as e:
-            log(f"Error posting to backend: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

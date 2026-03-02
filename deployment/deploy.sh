@@ -18,7 +18,11 @@ fi
 # Build and start containers
 echo "📦 Building and starting containers..."
 docker-compose down
-docker-compose up -d
+if [ "${DEPLOY_BUILD:-0}" = "1" ]; then
+    docker-compose up -d --build
+else
+    docker-compose up -d
+fi
 
 echo "✨ Deployment completed successfully!"
 echo "🌐 Frontend: http://localhost (or your server IP)"

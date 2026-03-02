@@ -4,22 +4,20 @@ import com.newshub.backend.application.service.CrawlerService;
 import com.newshub.backend.application.service.CacheService;
 import com.newshub.backend.application.service.IpLocationService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/public")
+@Slf4j
 public class WeatherController {
 
     @Autowired
@@ -37,18 +35,20 @@ public class WeatherController {
 
     @GetMapping("/weather")
     public ResponseEntity<Object> getWeather(HttpServletRequest request) {
-        String clientIp = request.getHeader("X-Real-IP");
-        if (clientIp == null || clientIp.isEmpty()) {
-            clientIp = request.getHeader("X-Forwarded-For");
-        }
-        if (clientIp == null || clientIp.isEmpty()) {
-            clientIp = request.getRemoteAddr();
-        }
+        String xRealIp = request.getHeader("X-Real-IP");
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        String remoteAddr = request.getRemoteAddr();
+
+        log.info("IP Headers - X-Real-IP: {}, X-Forwarded-For: {}, RemoteAddr: {}", xRealIp, xForwardedFor, remoteAddr);
+
+        String clientIp = extractClientIp(xRealIp, xForwardedFor, remoteAddr);
+        log.info("Resolved client IP: {}", clientIp);
         
         String city = ipLocationService.getCityFromIp(clientIp);
 
-        if (city == null) {
-            return ResponseEntity.ok(Collections.emptyList()); // Return empty if city cannot be determined
+        // Default to Shanghai if city cannot be determined
+        if (city == null || city.isEmpty()) {
+            city = "上海";
         }
 
         String cacheKey = WEATHER_CACHE_KEY_PREFIX + city;
@@ -62,6 +62,56 @@ public class WeatherController {
             // For immediate response, return empty and let frontend retry or show loading
             return ResponseEntity.ok(Collections.emptyList());
         }
+    }
+
+    private static String extractClientIp(String xRealIp, String xForwardedFor, String remoteAddr) {
+        String candidate = firstNonEmpty(
+                sanitizeIp(firstIpFromXff(xForwardedFor)),
+                sanitizeIp(xRealIp),
+                sanitizeIp(remoteAddr)
+        );
+        return candidate == null ? "" : candidate;
+    }
+
+    private static String firstIpFromXff(String xForwardedFor) {
+        if (xForwardedFor == null || xForwardedFor.isEmpty()) {
+            return null;
+        }
+        String[] parts = xForwardedFor.split(",");
+        for (String part : parts) {
+            String ip = part == null ? "" : part.trim();
+            if (!ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+                return ip;
+            }
+        }
+        return null;
+    }
+
+    private static String sanitizeIp(String ip) {
+        if (ip == null) {
+            return null;
+        }
+        String trimmed = ip.trim();
+        if (trimmed.isEmpty() || "unknown".equalsIgnoreCase(trimmed)) {
+            return null;
+        }
+        int commaIndex = trimmed.indexOf(',');
+        if (commaIndex >= 0) {
+            trimmed = trimmed.substring(0, commaIndex).trim();
+        }
+        if (trimmed.matches("^\\d{1,3}(?:\\.\\d{1,3}){3}:\\d{1,5}$")) {
+            return trimmed.substring(0, trimmed.indexOf(':'));
+        }
+        return trimmed;
+    }
+
+    private static String firstNonEmpty(String... values) {
+        for (String v : values) {
+            if (v != null && !v.isEmpty()) {
+                return v;
+            }
+        }
+        return null;
     }
 
     @PostMapping("/weather/update")

@@ -41,6 +41,31 @@
     ```
 4.  等待脚本执行完毕。首次构建可能需要几分钟。
 
+## 2.1 可选：本地一键部署到服务器（SSH Key）
+
+在本地电脑（已安装 `ssh` / `scp`）进入项目根目录执行：
+
+```bash
+python3 deployment/deploy_remote.py --host <服务器IP> --user root --remote-dir /www/wwwroot/blog
+```
+
+该脚本会将当前代码打包上传到服务器，并在服务器上执行 `docker-compose down` 和 `docker-compose up -d`。
+
+### Windows 配置 SSH Key（推荐）
+
+1.  打开 PowerShell，生成密钥（一路回车默认即可）：
+    ```powershell
+    ssh-keygen -t ed25519
+    ```
+2.  将公钥写入服务器的 `authorized_keys`：
+    ```powershell
+    type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh root@<服务器IP> "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+    ```
+3.  测试免密登录：
+    ```powershell
+    ssh root@<服务器IP>
+    ```
+
 ## 3. 访问与域名配置
 
 为了避免与宝塔的默认网站端口冲突，Docker 容器默认运行在 **8090** 端口。

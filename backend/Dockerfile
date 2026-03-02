@@ -17,9 +17,15 @@ RUN mvn clean package -DskipTests
 # Stage 3: Final image
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
-RUN apk add --no-cache python3 py3-pip build-base libxml2-dev libxslt-dev python3-dev && \
+
+# Install Python and create log directory with correct permissions
+RUN apk add --no-cache python3 py3-pip build-base libxml2-dev libxslt-dev python3-dev tzdata && \
     ln -sf /usr/bin/python3 /usr/bin/python && \
-    pip3 install --no-cache-dir feedparser requests beautifulsoup4 trafilatura kafka-python --break-system-packages
+    pip3 install --no-cache-dir feedparser requests beautifulsoup4 trafilatura kafka-python --break-system-packages && \
+    mkdir -p /var/log/newshub && chmod 777 /var/log/newshub
+
+ENV TZ=Asia/Shanghai
+
 COPY --from=build /app/target/*.jar app.jar
 ENV JAVA_OPTS=""
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -1,0 +1,11 @@
+app:
+  crawler:
+    enabled: true
+    interval: 14400000
+    python-command: python
+    script-path: /app/crawler-python
+
+logging:
+  level:
+    root: INFO
+    com.newshub.backend: INFO

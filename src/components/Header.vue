@@ -130,12 +130,7 @@ onMounted(() => {
   getWeatherByIp().then(data => {
     if (data && data.length > 0) {
       weatherInfo.value = data[0];
-      console.log('Weather Info:', weatherInfo.value); // Add this line for debugging
-    } else {
-      console.log('No weather data received.'); // Add this line for debugging
     }
-  }).catch(error => {
-    console.error('Error fetching weather:', error); // Add this line for debugging
   });
   getDailyHighlights().then(data => {
     dailyHighlights.value = data;

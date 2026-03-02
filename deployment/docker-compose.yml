@@ -22,9 +22,12 @@ services:
       - "8080:8080"
     volumes:
       - ../crawler-python:/app/crawler-python:ro
+      - ./logs/backend:/var/log/newshub
     environment:
       JAVA_OPTS: "-Xms256m -Xmx512m"
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/newshub?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      TZ: Asia/Shanghai
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/newshub?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       SPRING_DATA_REDIS_HOST: redis
@@ -52,12 +55,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: newshub
+      TZ: Asia/Shanghai
     ports:
       - "127.0.0.1:3307:3306" # Only expose to localhost for security
     volumes:
       - mysql_data:/var/lib/mysql
       - ../backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --default-time-zone=+08:00
     networks:
       - app-network
     deploy:

@@ -29,14 +29,17 @@ NewsHub 是一个基于现代化技术栈构建的全栈新闻聚合平台。它
 ---
 ## 🚢 ue 展示
 ## 客户端
-<img width="1564" height="943" alt="image" src="https://github.com/user-attachments/assets/88c1673f-c70e-443f-b682-1c3b1c6864fb" />
+<img width="1601" height="901" alt="image" src="https://github.com/user-attachments/assets/7666d158-acb6-4ab4-90c4-4ef00681951c" />
 
-<img width="1555" height="949" alt="image" src="https://github.com/user-attachments/assets/e16c35c2-3d26-4107-9331-6c4be5efd8ab" />
+<img width="1624" height="907" alt="image" src="https://github.com/user-attachments/assets/56a04e4a-b5a1-4537-8b22-6d7ba352e451" />
+
+<img width="1538" height="909" alt="image" src="https://github.com/user-attachments/assets/f4ac146f-742a-4e64-bd21-8fa2e043d538" />
 
 ## 管理端
-<img width="1897" height="954" alt="image" src="https://github.com/user-attachments/assets/f7baf84b-8755-4bfd-8098-69bbc435652f" />
+<img width="1876" height="711" alt="image" src="https://github.com/user-attachments/assets/a7c47e3c-c596-4d7d-9b0a-c787e150ed25" />
 
-<img width="1876" height="838" alt="image" src="https://github.com/user-attachments/assets/714b2802-93ff-4c38-bb3a-8974b492a20a" />
+<img width="1883" height="825" alt="image" src="https://github.com/user-attachments/assets/621a601e-5bdd-4195-ba3c-d07846e9235a" />
+<img width="1879" height="920" alt="image" src="https://github.com/user-attachments/assets/1ec09fef-dcda-4763-a85a-62db34b73a49" />
 
 
 ## 🛠 技术架构

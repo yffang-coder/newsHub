@@ -28,8 +28,13 @@ const getWeatherIcon = (type: string) => {
   return { icon: PartlyCloudy, color: 'text-gray-400' };
 };
 
-const fetchWeather = async () => {
-  loading.value = true;
+const maxRetries = 5;
+const retryDelayMs = 2000;
+
+const fetchWeather = async (attempt = 0) => {
+  if (attempt === 0) {
+    loading.value = true;
+  }
   try {
     const response = await axios.get('/api/public/weather');
     const data = response.data;
@@ -37,7 +42,6 @@ const fetchWeather = async () => {
     if (Array.isArray(data) && data.length > 0) {
       cities.value = data.map((item: any) => {
         const { icon, color } = getWeatherIcon(item.type);
-        // Clean up temp string if needed
         const low = item.low ? item.low.replace('°C', '') : 'N/A';
         const high = item.high ? item.high.replace('°C', '') : 'N/A';
         const currentTemp = item.temp || 'N/A';
@@ -51,15 +55,18 @@ const fetchWeather = async () => {
           color
         };
       });
-    } else {
-        // Fallback if empty
-        cities.value = [];
+      loading.value = false;
+      return;
     }
   } catch (error) {
     console.error('Failed to fetch weather', error);
-  } finally {
-    loading.value = false;
   }
+  if (attempt < maxRetries) {
+    setTimeout(() => fetchWeather(attempt + 1), retryDelayMs);
+    return;
+  }
+  cities.value = [];
+  loading.value = false;
 };
 
 onMounted(() => {

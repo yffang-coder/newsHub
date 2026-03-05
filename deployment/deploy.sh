@@ -18,7 +18,7 @@ fi
 # Build and start containers
 echo "📦 Building and starting containers..."
 docker-compose down
-if [ "${DEPLOY_BUILD:-0}" = "1" ]; then
+if [ "${DEPLOY_BUILD:-1}" = "1" ]; then
     docker-compose up -d --build
 else
     docker-compose up -d

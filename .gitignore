@@ -65,3 +65,5 @@ startup_*.log
 # OS
 Thumbs.db
 Desktop.ini
+backend/src/main/resources/application.yml
+
